@@ -1,10 +1,10 @@
 Scriptname OStimSexTats_MCM extends nl_mcm_module
 
-bool OST_ENABLED
+bool property OST_ENABLED auto
 
 Int function getVersion()
     return 1
-endevent
+endFunction
 
 event OnInit()
     RegisterModule("Core Options")
