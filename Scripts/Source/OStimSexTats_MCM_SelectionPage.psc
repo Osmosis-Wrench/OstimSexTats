@@ -1,0 +1,3 @@
+Scriptname OStimSexTats_MCM_SelectionPage extends nl_mcm_module
+
+event OnInit()

@@ -10,6 +10,7 @@ endFunction
 
 event OnInit()
     RegisterModule("Core Options")
+    (MY_QUEST as OStimSexTats_MCM_SelectionPage).RegisterModule("Available Tats", 100)
 endEvent
 
 event OnPageInit()

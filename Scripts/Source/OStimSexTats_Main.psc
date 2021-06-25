@@ -52,8 +52,10 @@ Function OST_ApplyTat()
         OSTMCM.WriteLog("Failed to apply tat.", true)
     endif
     
-    if (synchronize_tattoos(PlayerRef))
+    if (synchronize_tattoos(PlayerRef, true))
         OSTMCM.WriteLog("Failed to sync tats.", true)
+    Else
+        Debug.Notification("Your partner left some markings on your body.")
     endif
     JValue.CleanPool("SlaveTatsDemo")
 endFunction
