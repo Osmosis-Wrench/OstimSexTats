@@ -30,6 +30,7 @@
     <Scripts>
         <Script>OStimSexTats_Main.psc</Script>
         <Script>OStimSexTats_MCM.psc</Script>
+        <Script>OStimSexTats_MCM_SelectionPage.psc</Script>
     </Scripts>
     <ZipFiles Output="@Dist">
         <ZipFile Name="@ModName @Version" RootDir="@MyProject" Compression="deflate">

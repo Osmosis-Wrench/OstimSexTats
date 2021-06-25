@@ -4,13 +4,15 @@ bool property OST_ENABLED auto
 int OST_ENABLED_FLAG
 float Property OST_CHANCE Auto
 
+OStimSexTats_MCM_SelectionPage Property SelectionPage auto
+
 Int function getVersion()
     return 1
 endFunction
 
 event OnInit()
     RegisterModule("Core Options")
-    (MY_QUEST as OStimSexTats_MCM_SelectionPage).RegisterModule("Available Tats", 100)
+    RegisterModule("Tattoo Options")
 endEvent
 
 event OnPageInit()
