@@ -16,6 +16,9 @@ Event OnOstimStart(string eventName, string strArg, float numArg, Form sender)
         OSTMCM.WriteLog(1)
         Int tat = JMap.Object()
         tat = GetValidTat()
+        if (tat == -1)
+            return
+        endif
         JValue.Retain(tat)
         OSTMCM.WriteLog(2)
         while Ostim.AnimationRunning()
@@ -43,7 +46,7 @@ Int Function GetValidTat()
     if query_available_tattoos(template, matches)
         OSTMCM.WriteLog("Failed to find valid tats.", true)
         JValue.CleanPool("SlaveTatsDemo")
-        return
+        return -1
     endif
     
     OSTMCM.WriteLog(13 +" "+ matches)
