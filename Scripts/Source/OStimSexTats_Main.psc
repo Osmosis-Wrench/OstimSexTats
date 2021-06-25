@@ -59,7 +59,7 @@ Int Function GetValidTat()
     OSTMCM.WriteLog(15 +" "+ret)
     
     JValue.CleanPool("SlaveTatsDemo")
-    return ret
+    return matches
 endFunction
 
 Event OnKeyDown(Int Keycode)
