@@ -17,7 +17,7 @@ Event OnOstimStart(string eventName, string strArg, float numArg, Form sender)
         int tattoo = 0
 
         matches = JValue.addToPool(JArray.object(), "SlaveTatsDemo")
-        template = JValue.addToPool(JValue.objectFromPrototype("{\"name\": \"Slave (left breast) \", \"section\":\"Slave Marks\"}"), "SlaveTatsDemo")
+        template = JValue.addToPool(-1, "SlaveTatsDemo")
         
         if query_available_tattoos(template, matches)
             OSTMCM.WriteLog("Failed to find valid tats.", true)
@@ -26,13 +26,12 @@ Event OnOstimStart(string eventName, string strArg, float numArg, Form sender)
         endif
 
         tattoo =  JArray.getObj(matches, 0)
-        JMap.setInt(tattoo, "color", 11536724)
         
         while Ostim.AnimationRunning()
         utility.wait(1.0)
         endwhile
         
-        if (add_tattoo(PlayerRef, matches, -1))
+        if (add_tattoo(PlayerRef, tattoo))
             OSTMCM.WriteLog("Failed to apply tat.", true)
         endif
         
