@@ -11,7 +11,7 @@ endFunction
 
 event OnInit()
     RegisterModule("Core Options")
-    RegisterModule("Tattoo Options", 2, "oSexTats_MCM")
+    SelectionPage.RegisterModule("Tattoo Options", 2, "oSexTats_MCM")
 endEvent
 
 event OnPageInit()
