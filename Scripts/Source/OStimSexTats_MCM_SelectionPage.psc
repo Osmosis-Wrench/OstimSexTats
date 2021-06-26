@@ -1,30 +1,77 @@
 Scriptname OStimSexTats_MCM_SelectionPage extends nl_mcm_module
 
+String Blue = "#6699ff"
+String Pink = "#ff3389"
+
 event OnInit()
     RegisterModule("Tattoo Options", 2)
 endevent
 
 event OnPageDraw()
     SetCursorFillMode(TOP_TO_BOTTOM)
-    BuildTattooPage()
-endevent
-
-function BuildTattooPage()
-    int raw
-    if (JContainers.FileExistsAtPath(".\\slavetats_cache.json"))
-        raw = JValue.ReadFromFile(".\\slavetats_cache.json")
+    if (JContainers.FileExistsAtPath(JContainers.UserDirectory()+ "OST_DB.json"))
+        BuildTattooPage()
+    elseif (BuildDatabase())
+        BuildTattooPage()
     Else
         AddParagraph("Something went wrong, exit the MCM and try again. If this issue persists, double check that the Slavetats_cache.json file has been created by Slavetats.")
         return
     endif
-    jValue.writeToFile(raw, JContainers.UserDirectory()+"raw.json")
-    int data = JMap.GetObj(raw, "default.")
-    jValue.writeToFile(data, JContainers.UserDirectory()+"data.json")
-    string tattookey = JMap.NextKey(data)
-    while tattookey
-        AddToggleOptionST("tattoo_toggle_option___"+tattookey, tattookey, true)
-        tattookey = JMap.NextKey(data, tattookey)
+endevent
+
+bool function BuildDatabase()
+    int raw
+    if (JContainers.FileExistsAtPath(".\\slavetats_cache.json"))
+        raw = JValue.ReadFromFile(".\\slavetats_cache.json")
+    Else
+        return False
+    endif
+    string datapointer = JMap.NextKey(raw)
+    int data = JMap.GetObj(raw, datapointer)
+    JValue.WriteToFile(JContainers.UserDirectory()+ "OST_DB.json")
+    return true
+endfunction
+
+function BuildTattooPage()
+    int data
+    if (JContainers.FileExistsAtPath(JContainers.UserDirectory()+ "OST_DB.json"))
+        data = JValue.ReadFromFile(JContainers.UserDirectory()+ "OST_DB.json")
+    Else
+        AddParagraph("OST_DB.json not found, please report this error.")
+        return
+    endif
+    string bodykey = JMap.NextKey(data)
+    int bodydata
+    while bodykey
+        bodydata = JMap.GetObj(data, bodykey)
+        string title
+        if (BodyKey == "Body")
+            title = "Body Tattoos:"
+        elseif (BodyKey == "Face")
+            title = "Face Tattoos:"
+        elseif (BodyKey == "Hands")
+            title = "Hand Tattoos:"
+        elseif (BodyKey == "Feet")
+            title = "Feet Tattoos:"
+        Else
+            title = bodykey + " Tattoos:"
+        endif
+        AddHeaderOption(FONT_CUSTOM(title, pink))
+        Writelog(bodykey)
+        string packKey = Jmap.NextKey(bodydata)
+        while packKey
+            writelog(packkey)
+            AddToggleOptionST("tattoo_toggle_option___"+bodykey+packKey, packkey, true)
+            packkey = Jmap.NextKey(bodydata, packkey)
+        endwhile
+        bodykey = JMap.NextKey(data, bodykey)
     endwhile
+endfunction
+
+function BuildTattoObject(bool enabled)
+    int tatobj = Jmap.Object()
+    jmap.setInt(tatobj, "Enabled", enabled as Int)
+    return tatobj
 endfunction
 
 state tattoo_toggle_option
@@ -33,6 +80,6 @@ state tattoo_toggle_option
     endevent
 
     event OnHighlightST(string state_id)
-        SetInfoText("Enable or Disable " + state_id)
+        SetInfoText("Enable or Disable this Pack.")
     endevent
 endstate
