@@ -12,7 +12,7 @@ endFunction
 
 event OnInit()
     RegisterModule("Core Options")
-    RegisterModule("Tattoo Options")
+    RegisterModule("Tattoo Options", 2, "OStimSexTats_MCM")
 endEvent
 
 event OnPageInit()
