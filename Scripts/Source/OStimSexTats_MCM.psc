@@ -3,15 +3,12 @@ Scriptname OStimSexTats_MCM extends nl_mcm_module
 bool property OST_ENABLED auto
 float Property OST_CHANCE Auto
 
-OStimSexTats_MCM_SelectionPage Property SelectionPage auto
-
 Int function getVersion()
     return 1
 endFunction
 
 event OnInit()
     RegisterModule("Core Options")
-    SelectionPage.RegisterModule("Tattoo Options", 2, "oSexTats_MCM")
 endEvent
 
 event OnPageInit()
@@ -26,7 +23,6 @@ event OnVersionUpdate(int a_version)
 endevent
 
 event OnPageDraw()
-    ForcePageListReset()
     SetCursorFillMode(TOP_TO_BOTTOM)
     AddToggleOptionST("OST_ENABLED_STATE", "Enable Mod", OST_ENABLED)
     AddSliderOptionST("OST_CHANCE_STATE", "Probability", OST_CHANCE)
