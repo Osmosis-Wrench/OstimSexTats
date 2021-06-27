@@ -54,7 +54,7 @@ bool function BuildDatabase()
         endwhile
         bodykey = Jmap.NextKey(data, bodykey)
     endwhile
-    JValue.WriteToFile(data, JContainers.UserDirectory()+ "OST_DB.json")
+    JValue.WriteToFile(db, JContainers.UserDirectory()+ "OST_DB.json")
     return true
 endfunction
 
@@ -94,11 +94,8 @@ function BuildTattooPage()
     endwhile
 endfunction
 
-function buildTattooBodyObject(string body, string name, bool enabled)
 
-endfunction
-
-function BuildTattoPackObject(string name, bool enabled)
+int function BuildTattoPackObject(string name, bool enabled)
     int tatobj = Jmap.Object()
     jmap.setStr(tatobj, "Name", name)
     jmap.setInt(tatobj, "Enabled", enabled as Int)
@@ -114,3 +111,12 @@ state tattoo_toggle_option
         SetInfoText("Enable or Disable this Pack.")
     endevent
 endstate
+
+; This just makes life easier sometimes.
+Function WriteLog(String OutputLog, bool error = false)
+    MiscUtil.PrintConsole("oSexTats: " + OutputLog)
+    Debug.Trace("oSexTats: " + OutputLog)
+    if (error == true)
+        Debug.Notification("oSexTats: " + OutputLog)
+    endIF
+EndFunction
