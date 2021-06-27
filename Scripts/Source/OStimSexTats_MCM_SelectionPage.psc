@@ -9,6 +9,8 @@ endevent
 
 event OnPageDraw()
     SetCursorFillMode(TOP_TO_BOTTOM)
+    writelog("Building database.")
+    writelog("database built: " + BuildDatabase())
     if (JContainers.FileExistsAtPath(JContainers.UserDirectory()+ "OST_DB.json"))
         BuildTattooPage()
     elseif (BuildDatabase())
@@ -29,19 +31,19 @@ bool function BuildDatabase()
     string datapointer = JMap.NextKey(raw)
     int data = JMap.GetObj(raw, datapointer)
     string bodykey = JMap.NextKey(data)
-    int db
+    int ostdb = Jmap.object()
     int bodydata
     while bodykey
         bodydata = JMap.GetObj(data, bodykey)
         string title
         if (BodyKey == "Body")
-            title = "Body"
+            title = "Body Tattoos"
         elseif (BodyKey == "Face")
-            title = "Face"
+            title = "Face Tattoos"
         elseif (BodyKey == "Hands")
-            title = "Hand"
+            title = "Hand Tattoos"
         elseif (BodyKey == "Feet")
-            title = "Feet"
+            title = "Feet Tattoos"
         Else
             title = bodykey
         endif
@@ -49,12 +51,13 @@ bool function BuildDatabase()
         while packkey
             bool enabled = true
             string name = packkey
-            Jmap.SetObj(db, title, BuildTattoPackObject(name, enabled))
+            writelog(name + " " + title + " " + enabled)
+            Jmap.SetObj(ostdb, title + "."+ name, BuildTattoPackObject(name, enabled))
             packkey = Jmap.NextKey(bodydata, packkey)
         endwhile
         bodykey = Jmap.NextKey(data, bodykey)
     endwhile
-    JValue.WriteToFile(db, JContainers.UserDirectory()+ "OST_DB.json")
+    JValue.WriteToFile(ostdb, JContainers.UserDirectory()+ "OST_DB.json")
     return true
 endfunction
 
@@ -83,10 +86,8 @@ function BuildTattooPage()
             title = bodykey + " Tattoos:"
         endif
         AddHeaderOption(FONT_CUSTOM(title, pink))
-        Writelog(bodykey)
         string packKey = Jmap.NextKey(bodydata)
         while packKey
-            writelog(packkey)
             AddToggleOptionST("tattoo_toggle_option___"+bodykey+packKey, packkey, true)
             packkey = Jmap.NextKey(bodydata, packkey)
         endwhile
@@ -96,10 +97,11 @@ endfunction
 
 
 int function BuildTattoPackObject(string name, bool enabled)
-    int tatobj = Jmap.Object()
-    jmap.setStr(tatobj, "Name", name)
+    int tatobj = Jmap.object()
+    int ret = jmap.object()
     jmap.setInt(tatobj, "Enabled", enabled as Int)
-    return tatobj
+    jmap.setobj(ret, name, tatobj)
+    return ret
 endfunction
 
 state tattoo_toggle_option
