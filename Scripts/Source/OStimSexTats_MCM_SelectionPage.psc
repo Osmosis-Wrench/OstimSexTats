@@ -28,7 +28,33 @@ bool function BuildDatabase()
     endif
     string datapointer = JMap.NextKey(raw)
     int data = JMap.GetObj(raw, datapointer)
-    JValue.WriteToFile(JContainers.UserDirectory()+ "OST_DB.json")
+    string bodykey = JMap.NextKey(data)
+    int db
+    int bodydata
+    while bodykey
+        bodydata = JMap.GetObj(data, bodykey)
+        string title
+        if (BodyKey == "Body")
+            title = "Body"
+        elseif (BodyKey == "Face")
+            title = "Face"
+        elseif (BodyKey == "Hands")
+            title = "Hand"
+        elseif (BodyKey == "Feet")
+            title = "Feet"
+        Else
+            title = bodykey
+        endif
+        string packkey = JMap.NextKey(bodydata)
+        while packkey
+            bool enabled = true
+            string name = packkey
+            Jmap.SetObj(db, title, BuildTattoPackObject(name, enabled))
+            packkey = Jmap.NextKey(bodydata, packkey)
+        endwhile
+        bodykey = Jmap.NextKey(data, bodykey)
+    endwhile
+    JValue.WriteToFile(data, JContainers.UserDirectory()+ "OST_DB.json")
     return true
 endfunction
 
@@ -68,8 +94,13 @@ function BuildTattooPage()
     endwhile
 endfunction
 
-function BuildTattoObject(bool enabled)
+function buildTattooBodyObject(string body, string name, bool enabled)
+
+endfunction
+
+function BuildTattoPackObject(string name, bool enabled)
     int tatobj = Jmap.Object()
+    jmap.setStr(tatobj, "Name", name)
     jmap.setInt(tatobj, "Enabled", enabled as Int)
     return tatobj
 endfunction
