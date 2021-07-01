@@ -5,16 +5,17 @@ String Pink = "#ff3389"
 
 event OnInit()
     RegisterModule("Tattoo Options", 2)
+endevent
+
+event OnPageInit()
     BuildDatabase()
 endevent
 
 event OnPageDraw()
     SetCursorFillMode(TOP_TO_BOTTOM)
-    writelog("Building Database.")
     if (JContainers.FileExistsAtPath(JContainers.UserDirectory()+ "OST_DB.json"))
-        writelog("Database Built")
         BuildTattooPage()
-    elseif
+    elseif (BuildDatabase())
         BuildTattooPage()
     Else
         AddParagraph("Something went wrong, exit the MCM and try again. If this issue persists, double check that the Slavetats_cache.json file has been created by Slavetats.")
@@ -36,7 +37,6 @@ bool function BuildDatabase()
     if Bodydata
         string packname = Jmap.NextKey(bodydata)
         while packname
-            writelog(packname)
             JValue.SolveIntSetter(output, ".body."+packname, 1, true)
             packname = JMap.NextKey(Bodydata, packname)
         endwhile
@@ -46,7 +46,6 @@ bool function BuildDatabase()
     if facedata
         string packname = Jmap.NextKey(facedata)
         while packname
-            writelog(packname)
             JValue.SolveIntSetter(output, ".face."+packname, 1, true)
             packname = JMap.NextKey(facedata, packname)
         endwhile
@@ -56,7 +55,6 @@ bool function BuildDatabase()
     if handdata
         string packname = Jmap.NextKey(handdata)
         while packname
-            writelog(packname)
             JValue.SolveIntSetter(output, ".hand."+packname, 1, true)
             packname = JMap.NextKey(handdata, packname)
         endwhile
@@ -66,7 +64,6 @@ bool function BuildDatabase()
     if feetdata
         string packname = Jmap.NextKey(feetdata)
         while packname
-            writelog(packname)
             bool enabled = true
             JValue.SolveIntSetter(output, ".feet."+packname, enabled as Int, true)
             packname = JMap.NextKey(feetdata, packname)
