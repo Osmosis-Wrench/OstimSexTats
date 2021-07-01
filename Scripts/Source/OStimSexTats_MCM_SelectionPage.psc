@@ -5,15 +5,16 @@ String Pink = "#ff3389"
 
 event OnInit()
     RegisterModule("Tattoo Options", 2)
+    BuildDatabase()
 endevent
 
 event OnPageDraw()
     SetCursorFillMode(TOP_TO_BOTTOM)
-    writelog("Building database.")
-    writelog("database built: " + BuildDatabase())
+    writelog("Building Database.")
     if (JContainers.FileExistsAtPath(JContainers.UserDirectory()+ "OST_DB.json"))
+        writelog("Database Built")
         BuildTattooPage()
-    elseif (BuildDatabase())
+    elseif
         BuildTattooPage()
     Else
         AddParagraph("Something went wrong, exit the MCM and try again. If this issue persists, double check that the Slavetats_cache.json file has been created by Slavetats.")
@@ -26,39 +27,52 @@ bool function BuildDatabase()
     if (JContainers.FileExistsAtPath(".\\slavetats_cache.json"))
         raw = JValue.ReadFromFile(".\\slavetats_cache.json")
     Else
-        return False
+        Writelog("Slavetats cache not found, build by clicking Add/Remove in the Slavetats MCM.", true)
+        return false
     endif
-    string datapointer = JMap.NextKey(raw)
-    int data = JMap.GetObj(raw, datapointer)
-    string bodykey = JMap.NextKey(data)
-    int ostdb = Jmap.object()
-    int bodydata
-    while bodykey
-        bodydata = JMap.GetObj(data, bodykey)
-        string title
-        if (BodyKey == "Body")
-            title = "Body Tattoos"
-        elseif (BodyKey == "Face")
-            title = "Face Tattoos"
-        elseif (BodyKey == "Hands")
-            title = "Hand Tattoos"
-        elseif (BodyKey == "Feet")
-            title = "Feet Tattoos"
-        Else
-            title = bodykey
-        endif
-        string packkey = JMap.NextKey(bodydata)
-        while packkey
-            bool enabled = true
-            string name = packkey
-            writelog(name + " " + title + " " + enabled)
-            Jmap.SetObj(ostdb, title + "."+ name, BuildTattoPackObject(name, enabled))
-            packkey = Jmap.NextKey(bodydata, packkey)
+    int output = Jmap.Object()
+    int bodydata = Jmap.Object()
+    bodydata = JValue.SolveObj(raw, ".default.body")
+    if Bodydata
+        string packname = Jmap.NextKey(bodydata)
+        while packname
+            writelog(packname)
+            JValue.SolveIntSetter(output, ".body."+packname, 1, true)
+            packname = JMap.NextKey(Bodydata, packname)
         endwhile
-        bodykey = Jmap.NextKey(data, bodykey)
-    endwhile
-    JValue.WriteToFile(ostdb, JContainers.UserDirectory()+ "OST_DB.json")
-    return true
+    endif
+    int facedata = Jmap.Object()
+    facedata = JValue.SolveObj(raw, ".default.face")
+    if facedata
+        string packname = Jmap.NextKey(facedata)
+        while packname
+            writelog(packname)
+            JValue.SolveIntSetter(output, ".face."+packname, 1, true)
+            packname = JMap.NextKey(facedata, packname)
+        endwhile
+    endif
+    int handdata = Jmap.Object()
+    handdata = JValue.SolveObj(raw, ".default.hands")
+    if handdata
+        string packname = Jmap.NextKey(handdata)
+        while packname
+            writelog(packname)
+            JValue.SolveIntSetter(output, ".hand."+packname, 1, true)
+            packname = JMap.NextKey(handdata, packname)
+        endwhile
+    endif
+    int feetdata = Jmap.Object()
+    feetdata = JValue.SolveObj(raw, ".default.feet")
+    if feetdata
+        string packname = Jmap.NextKey(feetdata)
+        while packname
+            writelog(packname)
+            bool enabled = true
+            JValue.SolveIntSetter(output, ".feet."+packname, enabled as Int, true)
+            packname = JMap.NextKey(feetdata, packname)
+        endwhile
+    endif
+    JValue.WriteToFile(output, JContainers.UserDirectory() + "OST_DB.json")
 endfunction
 
 function BuildTattooPage()
@@ -78,7 +92,7 @@ function BuildTattooPage()
             title = "Body Tattoos:"
         elseif (BodyKey == "Face")
             title = "Face Tattoos:"
-        elseif (BodyKey == "Hands")
+        elseif (BodyKey == "Hand")
             title = "Hand Tattoos:"
         elseif (BodyKey == "Feet")
             title = "Feet Tattoos:"
@@ -86,27 +100,36 @@ function BuildTattooPage()
             title = bodykey + " Tattoos:"
         endif
         AddHeaderOption(FONT_CUSTOM(title, pink))
-        string packKey = Jmap.NextKey(bodydata)
-        while packKey
-            AddToggleOptionST("tattoo_toggle_option___"+bodykey+packKey, packkey, true)
-            packkey = Jmap.NextKey(bodydata, packkey)
+        string packkey = Jmap.NextKey(Bodydata)
+        while packkey
+            bool packenabled = (JValue.SolveInt(data, "."+bodykey+"."+packkey) as bool)
+            writelog(packenabled)
+            AddToggleOptionST("tattoo_toggle_option___" + bodykey + packkey, packkey, packenabled)
+            packkey = JMap.NextKey(Bodydata, packkey)
         endwhile
         bodykey = JMap.NextKey(data, bodykey)
     endwhile
 endfunction
 
 
-int function BuildTattoPackObject(string name, bool enabled)
+int function BuildTattooObj(bool enabled = true)
     int tatobj = Jmap.object()
-    int ret = jmap.object()
     jmap.setInt(tatobj, "Enabled", enabled as Int)
-    jmap.setobj(ret, name, tatobj)
-    return ret
+    return tatobj
 endfunction
 
 state tattoo_toggle_option
     event OnSelectST(string state_id)
-        
+        int data = JValue.ReadFromFile(JContainers.UserDirectory()+ "OST_DB.json")
+        string body = StringUtil.Substring(state_id, 0, 4)
+        string pack = StringUtil.Substring(state_id, 4, 0)
+        writelog(body)
+        writelog(pack)
+        bool packenabled = (JValue.SolveInt(data, "."+body+"."+pack) as bool)
+        packenabled = !packenabled
+        SetToggleOptionValueST(packenabled, false, "tattoo_toggle_option___"+state_id)
+        JValue.SolveIntSetter(data, "."+body+"."+pack, packenabled as Int)
+        JValue.WriteToFile(data, JContainers.UserDirectory() + "OST_DB.json")
     endevent
 
     event OnHighlightST(string state_id)
