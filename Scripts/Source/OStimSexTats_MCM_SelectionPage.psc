@@ -3,6 +3,10 @@ Scriptname OStimSexTats_MCM_SelectionPage extends nl_mcm_module
 String Blue = "#6699ff"
 String Pink = "#ff3389"
 
+Int function getVersion()
+    return 1
+endFunction
+
 event OnInit()
     RegisterModule("Tattoo Options", 2)
 endevent
@@ -31,45 +35,37 @@ bool function BuildDatabase()
         Writelog("Slavetats cache not found, build by clicking Add/Remove in the Slavetats MCM.", true)
         return false
     endif
-    int output = Jmap.Object()
-    int bodydata = Jmap.Object()
-    bodydata = JValue.SolveObj(raw, ".default.body")
-    if Bodydata
-        string packname = Jmap.NextKey(bodydata)
-        while packname
-            JValue.SolveIntSetter(output, ".body."+packname, 1, true)
-            packname = JMap.NextKey(Bodydata, packname)
+    int data = Jmap.object()
+    int output = Jmap.object()
+    data = JValue.SolveObj(raw, ".default")
+    ; build empty
+    string slotkey = JMap.nextKey(data)
+    while slotkey
+        int packdata = jmap.getObj(data, slotkey)
+        string packkey = JMap.NextKey(packdata)
+        while packkey
+            JValue.SolveIntSetter(output, "."+packkey+"."+"enabled", 1, true)
+            JValue.SolveIntSetter(output, "."+packkey+"."+"body", 0, true)
+            JValue.SolveIntSetter(output, "."+packkey+"."+"hands", 0, true)
+            JValue.SolveIntSetter(output, "."+packkey+"."+"face", 0, true)
+            JValue.SolveIntSetter(output, "."+packkey+"."+"feet", 0, true)
+            packkey = JMap.nextkey(packdata, packkey)
         endwhile
-    endif
-    int facedata = Jmap.Object()
-    facedata = JValue.SolveObj(raw, ".default.face")
-    if facedata
-        string packname = Jmap.NextKey(facedata)
-        while packname
-            JValue.SolveIntSetter(output, ".face."+packname, 1, true)
-            packname = JMap.NextKey(facedata, packname)
+        slotkey = JMap.nextkey(data, slotkey)
+    endwhile
+    ;build populated
+    slotkey = JMap.NextKey(data)
+    while slotkey
+        int packdata = jmap.getObj(data, slotkey)
+        string packkey = JMap.NextKey(packdata)
+        while packkey
+            JValue.SolveIntSetter(output, "."+packkey+"."+slotkey, 1, true)
+            packkey = JMap.nextkey(packdata, packkey)
         endwhile
-    endif
-    int handdata = Jmap.Object()
-    handdata = JValue.SolveObj(raw, ".default.hands")
-    if handdata
-        string packname = Jmap.NextKey(handdata)
-        while packname
-            JValue.SolveIntSetter(output, ".hand."+packname, 1, true)
-            packname = JMap.NextKey(handdata, packname)
-        endwhile
-    endif
-    int feetdata = Jmap.Object()
-    feetdata = JValue.SolveObj(raw, ".default.feet")
-    if feetdata
-        string packname = Jmap.NextKey(feetdata)
-        while packname
-            bool enabled = true
-            JValue.SolveIntSetter(output, ".feet."+packname, enabled as Int, true)
-            packname = JMap.NextKey(feetdata, packname)
-        endwhile
-    endif
+        slotkey = JMap.nextkey(data, slotkey)
+    endwhile
     JValue.WriteToFile(output, JContainers.UserDirectory() + "OST_DB.json")
+    return true
 endfunction
 
 function BuildTattooPage()
@@ -80,57 +76,44 @@ function BuildTattooPage()
         AddParagraph("OST_DB.json not found, please report this error.")
         return
     endif
-    string bodykey = JMap.NextKey(data)
-    int bodydata
-    while bodykey
-        bodydata = JMap.GetObj(data, bodykey)
-        string title
-        if (BodyKey == "Body")
-            title = "Body Tattoos:"
-        elseif (BodyKey == "Face")
-            title = "Face Tattoos:"
-        elseif (BodyKey == "Hand")
-            title = "Hand Tattoos:"
-        elseif (BodyKey == "Feet")
-            title = "Feet Tattoos:"
-        Else
-            title = bodykey + " Tattoos:"
-        endif
-        AddHeaderOption(FONT_CUSTOM(title, pink))
-        string packkey = Jmap.NextKey(Bodydata)
-        while packkey
-            bool packenabled = (JValue.SolveInt(data, "."+bodykey+"."+packkey) as bool)
-            writelog(packenabled)
-            AddToggleOptionST("tattoo_toggle_option___" + bodykey + packkey, packkey, packenabled)
-            packkey = JMap.NextKey(Bodydata, packkey)
-        endwhile
-        bodykey = JMap.NextKey(data, bodykey)
+    AddTextOptionST("OST_REBUILD_STATE", "Rebuild Database", "Click")
+    AddHeaderOption(FONT_CUSTOM("Currently installed Tattoo Packs:", Pink))
+    string packname = JMap.NextKey(data)
+    while packname
+        bool packenabled = (JValue.SolveInt(data, "."+packname+"."+"enabled") as bool)
+        AddToggleOptionST("tattoo_toggle_option___" +packname, packname, packenabled)
+        packname = JMap.NextKey(data, packname)
     endwhile
-endfunction
-
-
-int function BuildTattooObj(bool enabled = true)
-    int tatobj = Jmap.object()
-    jmap.setInt(tatobj, "Enabled", enabled as Int)
-    return tatobj
 endfunction
 
 state tattoo_toggle_option
     event OnSelectST(string state_id)
         int data = JValue.ReadFromFile(JContainers.UserDirectory()+ "OST_DB.json")
-        string body = StringUtil.Substring(state_id, 0, 4)
-        string pack = StringUtil.Substring(state_id, 4, 0)
-        writelog(body)
-        writelog(pack)
-        bool packenabled = (JValue.SolveInt(data, "."+body+"."+pack) as bool)
+        bool packenabled = (JValue.SolveInt(data, "."+state_id+"."+"enabled") as bool)
         packenabled = !packenabled
-        SetToggleOptionValueST(packenabled, false, "tattoo_toggle_option___"+state_id)
-        JValue.SolveIntSetter(data, "."+body+"."+pack, packenabled as Int)
+        JValue.SolveIntSetter(data, "."+state_id+"."+"enabled", packenabled as Int)
         JValue.WriteToFile(data, JContainers.UserDirectory() + "OST_DB.json")
+        SetToggleOptionValueST(packenabled, false, "tattoo_toggle_option___"+state_id)
     endevent
 
     event OnHighlightST(string state_id)
         SetInfoText("Enable or Disable this Pack.")
+    endevent
+endstate
+
+
+state OST_REBUILD_STATE
+    event OnSelectST(string state_id)
+        ShowMessage("Database building, please wait a moment before pressing OK.")
+        if (BuildDatabase())
+            ShowMessage("Database Built!")
+        else
+            ShowMessage("Database failed to build, ensure that the Slavetats cache has been built.")
+        endif
+    endevent
+
+    event OnHighlightST(string state_id)
+        SetInfoText("Rebuild oSexTats database to be in sync with current slavetats database.")
     endevent
 endstate
 
