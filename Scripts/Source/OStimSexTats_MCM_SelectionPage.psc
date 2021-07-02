@@ -101,12 +101,12 @@ state tattoo_toggle_option
     endevent
 endstate
 
-
 state OST_REBUILD_STATE
     event OnSelectST(string state_id)
         ShowMessage("Database building, please wait a moment before pressing OK.")
         if (BuildDatabase())
             ShowMessage("Database Built!")
+            ForcePageReset()
         else
             ShowMessage("Database failed to build, ensure that the Slavetats cache has been built.")
         endif
