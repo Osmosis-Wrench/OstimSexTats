@@ -3,6 +3,15 @@ Scriptname OStimSexTats_MCM_SelectionPage extends nl_mcm_module
 String Blue = "#6699ff"
 String Pink = "#ff3389"
 
+int property OSTJDB
+    int function get()
+        return JDB.solveObj(".OSTats.db")
+      endfunction
+      function set(int object)
+        JDB.solveObjSetter(".OSTats.db", object, true)
+      endfunction
+endproperty
+
 Int function getVersion()
     return 1
 endFunction
@@ -29,8 +38,10 @@ endevent
 
 bool function BuildDatabase()
     int raw
+    Writelog("Building Database")
     if (JContainers.FileExistsAtPath(".\\slavetats_cache.json"))
         raw = JValue.ReadFromFile(".\\slavetats_cache.json")
+        Writelog("Loading Cache")
     Else
         Writelog("Slavetats cache not found, build by clicking Add/Remove in the Slavetats MCM.", true)
         return false
@@ -65,34 +76,28 @@ bool function BuildDatabase()
         slotkey = JMap.nextkey(data, slotkey)
     endwhile
     JValue.WriteToFile(output, JContainers.UserDirectory() + "OST_DB.json")
+    OSTJDB = output
     return true
 endfunction
 
 function BuildTattooPage()
-    int data
-    if (JContainers.FileExistsAtPath(JContainers.UserDirectory()+ "OST_DB.json"))
-        data = JValue.ReadFromFile(JContainers.UserDirectory()+ "OST_DB.json")
-    Else
-        AddParagraph("OST_DB.json not found, please report this error.")
-        return
-    endif
     AddTextOptionST("OST_REBUILD_STATE", "Rebuild Database", "Click")
     AddHeaderOption(FONT_CUSTOM("Currently installed Tattoo Packs:", Pink))
-    string packname = JMap.NextKey(data)
+    SetCursorFillMode(LEFT_TO_RIGHT)
+    AddHeaderOption("")
+    string packname = JMap.NextKey(OSTJDB)
     while packname
-        bool packenabled = (JValue.SolveInt(data, "."+packname+"."+"enabled") as bool)
+        bool packenabled = (JValue.SolveInt(OSTJDB, "."+packname+"."+"enabled") as bool)
         AddToggleOptionST("tattoo_toggle_option___" +packname, packname, packenabled)
-        packname = JMap.NextKey(data, packname)
+        packname = JMap.NextKey(OSTJDB, packname)
     endwhile
 endfunction
 
 state tattoo_toggle_option
     event OnSelectST(string state_id)
-        int data = JValue.ReadFromFile(JContainers.UserDirectory()+ "OST_DB.json")
-        bool packenabled = (JValue.SolveInt(data, "."+state_id+"."+"enabled") as bool)
+        bool packEnabled = (JValue.SolveInt(OSTJDB, "."+state_id+"."+"enabled") as bool)
         packenabled = !packenabled
-        JValue.SolveIntSetter(data, "."+state_id+"."+"enabled", packenabled as Int)
-        JValue.WriteToFile(data, JContainers.UserDirectory() + "OST_DB.json")
+        JValue.SolveIntSetter(OSTJDB, "."+state_id+"."+"enabled", packenabled as Int)
         SetToggleOptionValueST(packenabled, false, "tattoo_toggle_option___"+state_id)
     endevent
 

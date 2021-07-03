@@ -11,7 +11,7 @@
         <Variable Name="ModName" Value="oSexTats"/>
         <Variable Name="MyProject" Value="."/>
         <Variable Name="Dist" Value="../Dist"/>
-        <Variable Name="Version" Value="0.5"/>
+        <Variable Name="Version" Value="0.7"/>
     </Variables>
     <Imports>
         <Import>@MyProject\Scripts\Source</Import>

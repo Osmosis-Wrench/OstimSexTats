@@ -6,6 +6,15 @@ Actor Property PlayerRef Auto
 
 Import SlaveTats
 
+int property OSTJDB
+    int function get()
+        return JDB.solveObj(".OSTats.db")
+      endfunction
+      function set(int object)
+        JDB.solveObjSetter(".OSTats.db", object, true)
+      endfunction
+endproperty
+
 Event OnInit()
     RegisterForModEvent("OStim_Start", "OnOstimStart")
 EndEvent
