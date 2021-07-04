@@ -12,6 +12,16 @@ int property OSTJDB
       endfunction
 endproperty
 
+
+int property OSTValid
+    int function get()
+        return JDB.solveObj(".OSTats.Valid")
+      endfunction
+      function set(int object)
+        JDB.solveObjSetter(".OSTats.Valid", object, true)
+      endfunction
+endproperty
+
 Int function getVersion()
     return 1
 endFunction
@@ -77,7 +87,21 @@ bool function BuildDatabase()
     endwhile
     JValue.WriteToFile(output, JContainers.UserDirectory() + "OST_DB.json")
     OSTJDB = output
+    UpdateOSTValid()
     return true
+endfunction
+
+function UpdateOSTValid()
+    int validTattoos = Jmap.Object()
+    string namekey = JMap.NextKey(OSTJDB)
+    while namekey
+        if (JMap.SolveInt(OSTJDB, "."+namekey+".enabled") as bool)
+            JMap.setObj(validTattoos, namekey, JMap.GetObject(OSTJDB, namekey))
+        endif
+        namekey = Jmap.NextKey(OSTJDB, namekey)
+    endwhile
+    OSTValid = validTattoos
+    JValue.WriteToFile(validTattoos, JContainers.UserDirectory() + "valid.json")
 endfunction
 
 function BuildTattooPage()
@@ -99,6 +123,7 @@ state tattoo_toggle_option
         packenabled = !packenabled
         JValue.SolveIntSetter(OSTJDB, "."+state_id+"."+"enabled", packenabled as Int)
         SetToggleOptionValueST(packenabled, false, "tattoo_toggle_option___"+state_id)
+        UpdateOSTValid()
     endevent
 
     event OnHighlightST(string state_id)

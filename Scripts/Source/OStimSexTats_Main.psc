@@ -15,6 +15,15 @@ int property OSTJDB
       endfunction
 endproperty
 
+int property OSTValid
+    int function get()
+        return JDB.solveObj(".OSTats.Valid")
+      endfunction
+      function set(int object)
+        JDB.solveObjSetter(".OSTats.Valid", object, true)
+      endfunction
+endproperty
+
 Event OnInit()
     RegisterForModEvent("OStim_Start", "OnOstimStart")
 EndEvent
@@ -35,17 +44,28 @@ Event OnOstimStart(string eventName, string strArg, float numArg, Form sender)
 EndEvent
 
 Function OST_ApplyTat()
+    int cache = acquire_cache()
+    int randomPack = Jmap.Object()
+    int rand = Utility.RandomInt(0, JValue.Count(OSTValid))
+    writelog(rand)
+    randompack = JMap.GetObj(OSTValid, rand)
+    
+
+
+EndFunction
+
+Function OST_ApplyTat1()
     OSTMCM.Writelog(2)
     int matches = 0
     int template = 0
     int tattoo = 0
 
-    matches = JValue.addToPool(JArray.object(), "SlaveTatsDemo")
-    template = JValue.addToPool(-1, "SlaveTatsDemo")
-    
+    matches = JValue.addToPool(JArray.object(), "OSTPOOL")
+    template = JValue.addToPool(-1, "OSTPOOL")
+
     if query_available_tattoos(template, matches)
         OSTMCM.WriteLog("Failed to find valid tats.", true)
-        JValue.CleanPool("SlaveTatsDemo")
+        JValue.CleanPool("OSTPOOL")
         return
     endif
 
@@ -66,5 +86,5 @@ Function OST_ApplyTat()
     Else
         Debug.Notification("Your partner left some markings on your body.")
     endif
-    JValue.CleanPool("SlaveTatsDemo")
+    JValue.CleanPool("OSTPOOL")
 endFunction
