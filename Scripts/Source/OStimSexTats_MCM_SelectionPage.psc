@@ -36,9 +36,15 @@ event OnPageDraw()
     endif
 endevent
 
-bool function BuildDatabase()
+bool function BuildDatabase1()
     int zDatabase = JValue.ReadFromFile("slavetats_cache.json")
     int test = JValue.evalLuaObj(zDatabase, "return SexTats.handleSlaveTats(jobject)")
+    JValue.WriteToFile(test, "OSTJDB_123.json")
+endfunction
+
+bool function BuildDatabase()
+    int zDatabase = JValue.readFromDirectory("Data\\Textures\\Actors\\Character\\slavetats",".json")
+    int test = JValue.evalLuaObj(zDatabase, "return SexTats.handleFiles(jobject)")
     JValue.WriteToFile(test, "OSTJDB_123.json")
 endfunction
 
