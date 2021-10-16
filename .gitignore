@@ -10,3 +10,4 @@
 Scripts/OStimSexTats_Main.pex
 Scripts/OStimSexTats_MCM.pex
 *.pex
+.vscode/settings.json

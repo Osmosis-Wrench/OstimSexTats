@@ -22,13 +22,13 @@ function SexTats.handleFiles(collection)
 	for x = 1, #allTattooArray do
 		local areaName = allTattooArray[x].area:lower()
 		if areaName == 'body' then
-			JArray.insert(allBodyArray, allTattooArray[x])
+			JArray.insert(allBodyArray, allTattooArray[x], 1)
 		elseif areaName == 'face' then
-			JArray.insert(allFaceArray, allTattooArray[x])
+			JArray.insert(allFaceArray, allTattooArray[x], 1)
 		elseif areaName == 'feet' then
-			JArray.insert(allFeetArray, allTattooArray[x])
+			JArray.insert(allFeetArray, allTattooArray[x], 1)
 		elseif areaName == 'hands' then
-			JArray.insert(allHandsArray, allTattooArray[x])
+			JArray.insert(allHandsArray, allTattooArray[x], 1)
 		end
 	end
 
@@ -81,7 +81,7 @@ function SexTats.handleSlaveTats(collection)
 			for x = 0, #v do
 	    		local tattooArray = packArray[x]
 				if tattooArray.texture ~= nil and tattooArray.section ~= nil and tattooArray.area ~= nil and tattooArray.name ~= nil then --if any important stuff is missing, don't append or process any more. skip to next
-					local section, area, name = 'empty'
+					local section, area, name = 'empty','empty','empty'
 					-- this is where we can add in custom data, like tags, enabled state etc.
 					JMap.__newindex(tattooArray, 'enabled', 1)
 					-- build key name
