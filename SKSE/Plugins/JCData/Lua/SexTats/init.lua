@@ -3,6 +3,10 @@ local jc = jrequire 'jc'
 local SexTats = {}
 
 -- recreates slavetats_cache.json I think, it's pretty fucking close at least.
+-- create flat array with all tatto objects in it, then split that into body area's, then convert to jmap with sections as key.
+-- expects something like this:
+--			int zDatabase = JValue.readFromDirectory("Data\\Textures\\Actors\\Character\\slavetats",".json")
+--			zDatabase = JValue.evalLuaObj(zDatabase, "return SexTats.handleFiles(jobject)")
 function SexTats.handleFiles(collection)
 	local ret = JMap.object()
 	local groupedByArea = JMap.object()
@@ -45,6 +49,7 @@ function SexTats.handleFiles(collection)
 	return ret
 end
 
+-- converts flat jarray into JMap with section as key.
 function SexTats.sortArrayToMapSection(collection)
 	local ret = JMap.object()
 
@@ -55,13 +60,11 @@ function SexTats.sortArrayToMapSection(collection)
 			local temp = JArray.object()
 			temp = jc.filter(ret[sectionName], function() return true end)
 			-- weird hack to normalise JArray, otherwise we'd end up with a bunch of jarrays inside jarrays
-			-- I really don't understand why this works, but it does. If you know, please fucking tell me.
 			JArray.insert(temp, collection[x])
 			
 			ret[sectionName] = temp
 		else
 			local firstTemp = JArray.object()
-			--collection[x].number = x
 			JArray.insert(firstTemp, collection[x])
 			ret[sectionName] = firstTemp
 		end
@@ -71,6 +74,7 @@ function SexTats.sortArrayToMapSection(collection)
 end
 
 -- okay this is pretty gross code, but it works.
+-- converts slavetats_cache.json into our own format that is easier to handle for parsing with lua, maybe.
 function SexTats.handleSlaveTats(collection)
 	local ret = JMap.object()
 	collection = jc.filter(collection.Default, function(x) return x end) -- this is a weird hack
@@ -94,6 +98,27 @@ function SexTats.handleSlaveTats(collection)
 	    	end
 	    end
 		b = b + 1
+	end
+	return ret
+end
+
+-- returns all tattoo packs in a list, this was weirdly complex and can 100% be made simpler.
+function SexTats.BuildTattooPage(collection)
+	local temp = JArray.object()
+	local ret = JArray.object()
+	for k,v in pairs(collection) do
+		JArray.insert(temp, v.section)
+	end
+	for k,v in ipairs(temp) do -- clear out dupes
+		local found = false
+		for x=0, #ret do
+			if ret[x] == v then
+				found = true
+			end
+		end
+		if found ~= true then
+			JArray.insert(ret, v)
+		end
 	end
 	return ret
 end
