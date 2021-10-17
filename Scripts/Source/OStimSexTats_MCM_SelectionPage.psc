@@ -86,7 +86,7 @@ endfunction
 
 state tattoo_pack_toggle
     event OnSelectST(string state_id)
-        writelog("toggled "+packname)
+        writelog("toggled "+state_id)
     endevent
 
     event OnHighlightST(string state_id)
